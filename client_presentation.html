@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LND-11 | Client Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #06101E;
+      --bg-gradient: radial-gradient(circle at center, #112235 0%, #06101E 100%);
+      --panel-bg: rgba(30, 62, 98, 0.35);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #F5F7FA;
+      --text-muted: #A0AEC0;
+      --primary: #3B82F6;
+      --secondary: #6366F1;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Slides Container */
+    #presentation-container {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide {
+      position: absolute;
+      width: 90%;
+      max-width: 1200px;
+      height: 80%;
+      max-height: 700px;
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    /* Typography */
+    h1, h2, h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .slide-title {
+      font-size: 2.8rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: 1.2rem;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    /* Card styling */
+    .glass-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--glass-shadow);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Specific components */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .badge-primary { background: rgba(59, 130, 246, 0.15); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .bullet-list {
+      list-style: none;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .bullet-list li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    /* Title Slide Specifics */
+    .title-slide {
+      text-align: center;
+      align-items: center;
+    }
+
+    .title-slide h1 {
+      font-size: 4.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #FFFFFF 30%, #60A5FA 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.03em;
+    }
+
+    .title-tagline {
+      font-size: 1.8rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      max-width: 800px;
+    }
+
+    /* Controls & Navigation Footer */
+    #presentation-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      border-top: 1px solid var(--border-color);
+      background: rgba(6, 16, 30, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .nav-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .slide-progress-container {
+      flex: 1;
+      max-width: 600px;
+      margin: 0 2rem;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #slide-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    #slide-indicator {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Interactive Demo Widget */
+    .demo-container {
+      display: flex;
+      gap: 1rem;
+      height: 100%;
+    }
+
+    .demo-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 250px;
+    }
+
+    .demo-tab {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .demo-tab:hover {
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .demo-tab.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+
+    .demo-view {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .demo-card {
+      width: 100%;
+      max-width: 450px;
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .demo-card.active {
+      display: block;
+    }
+
+    /* Score Indicator Gauge */
+    .gauge-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .score-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .score-circle.green { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 3px solid var(--success); }
+    .score-circle.orange { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 3px solid var(--warning); }
+    .score-circle.red { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 3px solid var(--danger); }
+
+    /* Interactive Calculator Demo */
+    .calculator-box {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .form-select {
+      width: 100%;
+      background: rgba(6, 16, 30, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .form-select:focus {
+      border-color: var(--primary);
+    }
+
+    .calc-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s ease;
+    }
+
+    .calc-btn:hover {
+      opacity: 0.9;
+    }
+
+    .calc-result-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-left: 1px solid var(--border-color);
+      padding-left: 2rem;
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Keyframe Animations */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    .pulse-effect {
+      animation: pulse 2s infinite;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Slides Viewport -->
+  <div id="presentation-container">
+
+    <!-- Slide 1: Title Slide -->
+    <div class="slide title-slide active" id="slide-1">
+      <div class="badge badge-primary pulse-effect">LND-11 Platform</div>
+      <h1>Decisive Climate Risk Intelligence</h1>
+      <div class="title-tagline">Providing Survey-Number-Level Environmental & Water Security Ratings for Land Assets across India.</div>
+      <p style="font-size: 1.2rem; color: var(--primary); font-weight: 600;">The Credit Score for Land</p>
+    </div>
+
+    <!-- Slide 2: The Core Problem -->
+    <div class="slide" id="slide-2">
+      <span class="slide-subtitle">The Dilemma</span>
+      <h2 class="slide-title">The Cost of Environmental Blindness</h2>
+      <div class="grid-2">
+        <div>
+          <p>Real estate, infrastructure, and renewable energy acquisitions represent high-stakes capital placements. Yet, traditional site assessment remains broken:</p>
+          <ul class="bullet-list" style="margin-top: 1rem;">
+            <li><strong>Fragmented Datasets:</strong> Water records, climate grids, and topography models are spread across silos.</li>
+            <li><strong>Scale Mismatches:</strong> Standard climate forecasts run at 50km grids; site assets require sub-acre analysis.</li>
+            <li><strong>Consultancy Bottlenecks:</strong> Manual surveys take weeks, costing lakhs per parcel, preventing rapid site screening.</li>
+          </ul>
+        </div>
+        <div class="glass-card" style="border-left: 4px solid var(--danger);">
+          <h3 style="color: var(--danger); margin-bottom: 0.5rem;">The Catastrophic Blindspot</h3>
+          <p style="color: var(--text-main); font-size: 1rem;">"Acquiring ₹100+ Crore plots without auditing hydrological slope channels, localized flood records, or 20-year groundwater decay rate tables exposes projects to immediate structural and compliance failures."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: The Solution -->
+    <div class="slide" id="slide-3">
+      <span class="slide-subtitle">Our Solution</span>
+      <h2 class="slide-title">The Credit Score for Land</h2>
+      <div class="grid-2">
+        <div class="glass-card">
+          <h3 style="margin-bottom: 1rem; color: var(--primary);">Instant, Scalable Diligence</h3>
+          <p>LND-11 fuses 50+ spatial data layers into a unified, survey-number-level risk rating engine, generating comprehensive assessments in under 120 seconds.</p>
+          <ul class="bullet-list" style="margin-top: 1rem;">
+            <li>Enter Survey Number + Village, Coordinates, or GeoJSON.</li>
+            <li>Instant PDF risk profiling & API reporting.</li>
+            <li>Probabilistic indices mapping physical climate exposures.</li>
+          </ul>
+        </div>
+        <div>
+          <div style="background: rgba(30, 62, 98, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+              <span style="font-weight: 600;">LND-11 Risk Audit Profile</span>
+              <span style="color: var(--success); font-weight: 700;">AAA RATED</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Climate Hazard Index</span><span style="font-weight: 600;">12 / 100 (Negligible)</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Water Supply Security</span><span style="font-weight: 600;">88 / 100 (Safe)</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Structural Suitability</span><span style="font-weight: 600;">91 / 100 (Optimal)</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-muted);">Regulatory / ESG Rating</span><span style="font-weight: 600;">14 / 100 (Compliant)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Key Capabilities -->
+    <div class="slide" id="slide-4">
+      <span class="slide-subtitle">Capability Suite</span>
+      <h2 class="slide-title">The Four Pillars of Land Rating</h2>
+      <div class="demo-container">
+        <div class="demo-controls">
+          <div class="demo-tab active" onclick="switchDemo(0)">1. Climate Risk Score</div>
+          <div class="demo-tab" onclick="switchDemo(1)">2. Water Security Score</div>
+          <div class="demo-tab" onclick="switchDemo(2)">3. Suitability Score</div>
+          <div class="demo-tab" onclick="switchDemo(3)">4. ESG Risk Score</div>
+        </div>
+        <div class="demo-view">
+          
+          <div class="demo-card glass-card active" id="demo-card-0">
+            <span class="badge badge-warning">Pillar 1</span>
+            <h3 style="margin-bottom: 0.5rem;">Climate Risk Index (0 - 100)</h3>
+            <p>Calculates cumulative physical exposure to flood, drought, landslide, soil erosion, and severe wind anomalies. Calibrated using IMD 100-year historical daily grids.</p>
+            <div class="gauge-wrapper">
+              <div class="score-circle orange">38</div>
+              <div>
+                <div style="font-weight: 600; color: var(--warning);">Moderate Combined Hazard</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Calibration Confidence: ±4.2%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card glass-card" id="demo-card-1">
+            <span class="badge badge-success">Pillar 2</span>
+            <h3 style="margin-bottom: 0.5rem;">Water Security Score (0 - 100)</h3>
+            <p>Evaluates hydrological resource reserves. Factoring in 10-year localized groundwater drawdown trends, distance to perennial water networks, and rainfall standard anomalies.</p>
+            <div class="gauge-wrapper">
+              <div class="score-circle red">42</div>
+              <div>
+                <div style="font-weight: 600; color: var(--danger);">High Water Risk Zone</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Aquifer classified as Over-exploited.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card glass-card" id="demo-card-2">
+            <span class="badge badge-primary">Pillar 3</span>
+            <h3 style="margin-bottom: 0.5rem;">Land Development Suitability (0 - 100)</h3>
+            <p>Determines civil engineering site feasibility. Evaluates terrain ruggedness (TRI), slope gradients (demarcating solar racking efficiency), and soil permeability variables.</p>
+            <div class="gauge-wrapper">
+              <div class="score-circle green">78</div>
+              <div>
+                <div style="font-weight: 600; color: var(--success);">Highly Suitable Slopes</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Ideal aspect orientation, <5° slope variance.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card glass-card" id="demo-card-3">
+            <span class="badge badge-primary">Pillar 4</span>
+            <h3 style="margin-bottom: 0.5rem;">ESG Risk Rating (0 - 100)</h3>
+            <p>Monitors baseline biodiversity indexes. Inspects above-ground carbon content estimates, NDVI decay tracking, and intersections with forest buffer boundaries.</p>
+            <div class="gauge-wrapper">
+              <div class="score-circle green">18</div>
+              <div>
+                <div style="font-weight: 600; color: var(--success);">Excellent ESG Grade</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">No forest reserve boundary intersections found.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: The Science & AI -->
+    <div class="slide" id="slide-5">
+      <span class="slide-subtitle">Technology</span>
+      <h2 class="slide-title">How Spatial AI Solves Hydrology</h2>
+      <div class="grid-2">
+        <div>
+          <p>Traditional tabular machine learning fails to model directional water flow. LND-11 solves this using spatial structures:</p>
+          <ul class="bullet-list" style="margin-top: 1rem;">
+            <li><strong>Graph Neural Networks (GraphSAGE):</strong> Models land parcels as nodes on river catchments and watershed networks to predict downstream accumulation and flooding.</li>
+            <li><strong>Conformal Prediction:</strong> Ensures that every output score includes calibrated confidence intervals to establish statistical reliability for institutional finance.</li>
+            <li><strong>S3 GeoParquet Lakehouse:</strong> Enables sub-second parallel spatial lookups over terabytes of historical weather grids.</li>
+          </ul>
+        </div>
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center;">
+          <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-family: 'Outfit';">The Data Synthesis Loop</h4>
+          <div style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+            <p>1. User Input -> Cadastral Boundary Georeferenced.</p>
+            <p>2. HTTP Range Requests scan COGs in Amazon S3.</p>
+            <p>3. Parallel Zonal Stats extracted on EKS Workers.</p>
+            <p>4. Pre-trained models predict calibrated probabilities in under 2 seconds.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Solar/Wind IPPs Use Case -->
+    <div class="slide" id="slide-6">
+      <span class="slide-subtitle">Industry Focus</span>
+      <h2 class="slide-title">Renewable Energy Site Screening</h2>
+      <div class="grid-2">
+        <div class="glass-card">
+          <h3 style="color: var(--primary); margin-bottom: 1rem;">De-risking Clean Power Devs</h3>
+          <p>Utility solar and wind installations are highly sensitive to topography and flash flood patterns. LND-11 offers rapid land screening tools:</p>
+          <ul class="bullet-list" style="margin-top: 0.5rem;">
+            <li><strong>Racking Slope Optimization:</strong> Identifies regions with < 5-degree aspect slopes to maximize solar panels.</li>
+            <li><strong>Drainage Basin Intersections:</strong> Avoids placing trackers inside local seasonal runoff channels.</li>
+            <li><strong>Erosion Warnings:</strong> Identifies high-velocity run-off zones to protect foundations.</li>
+          </ul>
+        </div>
+        <div class="glass-card" style="border-top: 4px solid var(--success);">
+          <span style="font-size: 0.85rem; text-transform: uppercase; color: var(--success); font-weight: 600;">Client Case Study</span>
+          <h4 style="margin: 0.5rem 0;">ACME Wind-Solar Park Screening</h4>
+          <p style="font-size: 0.95rem;">"Using LND-11 bulk screening, the development team filtered 1,500 cadastral parcels in Gujarat, identifying and eliminating 120 flood-vulnerable plots during the pre-bid stage, saving ₹18 Crores in future structural repairs."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Real Estate & Townships Use Case -->
+    <div class="slide" id="slide-7">
+      <span class="slide-subtitle">Industry Focus</span>
+      <h2 class="slide-title">Climate Resilience for Real Estate</h2>
+      <div class="grid-2">
+        <div>
+          <p>Acquiring land for high-density townships in expanding suburbs carries massive capital and liability exposure. LND-11 helps developers build climate-resilient projects:</p>
+          <ul class="bullet-list" style="margin-top: 1rem;">
+            <li><strong>Urban Inundation Projections:</strong> Models water retention capacity on concrete layouts during 50-year rainfall events.</li>
+            <li><strong>Soil Foundation Analytics:</strong> Detects clay expansion anomalies preventing foundation cracking.</li>
+            <li><strong>Water Supply Security Checks:</strong> Evaluates aquifer depletion rates over the next 20 years to map structural reliance on private tankers.</li>
+          </ul>
+        </div>
+        <div class="glass-card" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3);">
+          <h3 style="color: #818CF8; margin-bottom: 0.5rem;">The Drainage Advantage</h3>
+          <p style="font-size: 0.95rem;">"Traditional zoning maps fail to capture urban stormwater flow. LND-11's local drainage index computes micro-catchments, allowing real estate architects to design optimal storm-water layouts before breaking ground."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Banks & Mortgage Use Case -->
+    <div class="slide" id="slide-8">
+      <span class="slide-subtitle">Industry Focus</span>
+      <h2 class="slide-title">Institutional Underwriting & ESG</h2>
+      <div class="grid-2">
+        <div class="glass-card">
+          <h3 style="color: var(--primary); margin-bottom: 1rem;">Standardizing Physical Risk</h3>
+          <p>Banks and housing finance institutions require standard, quantifiable ESG and climate disclosures for capital underwriting under RBI climate recommendations.</p>
+          <ul class="bullet-list" style="margin-top: 0.5rem;">
+            <li><strong>Automated Portfolio Audits:</strong> Scan entire mortgage books to evaluate property vulnerability exposure.</li>
+            <li><strong>Standardized Scoring:</strong> Simple AAA through BB grades integrate into credit committee approval sheets.</li>
+            <li><strong>CMIP6 Projections:</strong> Models collateral valuation hazards out to 2030, 2050, and 2080.</li>
+          </ul>
+        </div>
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center; text-align: center;">
+          <h1 style="font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem;">AAA to BB</h1>
+          <p style="color: var(--text-main); font-weight: 600;">The standard index for mortgage risk screening</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Aligned with TCFD and RBI physical risk disclosure guidelines.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Deliverables -->
+    <div class="slide" id="slide-9">
+      <span class="slide-subtitle">Delivery Channels</span>
+      <h2 class="slide-title">How You Access LND-11</h2>
+      <div class="grid-3">
+        <div class="glass-card">
+          <h3 style="color: var(--primary); margin-bottom: 0.8rem; font-size: 1.25rem;">1. SaaS Portal</h3>
+          <p style="font-size: 0.95rem; line-height: 1.5;">An interactive, map-based portal allowing developers to search survey plots, draw polygons, and visualize raster overlays instantly.</p>
+        </div>
+        <div class="glass-card">
+          <h3 style="color: var(--primary); margin-bottom: 0.8rem; font-size: 1.25rem;">2. Developer APIs</h3>
+          <p style="font-size: 0.95rem; line-height: 1.5;">REST and GraphQL schemas to query ratings directly from property loan management systems and ERP modules.</p>
+        </div>
+        <div class="glass-card">
+          <h3 style="color: var(--primary); margin-bottom: 0.8rem; font-size: 1.25rem;">3. Bankable Reports</h3>
+          <p style="font-size: 0.95rem; line-height: 1.5;">Detailed 15-page PDF deliverables compiling topography graphs, climate histories, and ESG profiles ready for board submission.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: Value Proposition & ROI -->
+    <div class="slide" id="slide-10">
+      <span class="slide-subtitle">Value Proposal</span>
+      <h2 class="slide-title">Unlocking Significant Diligence ROI</h2>
+      <div class="grid-2">
+        <div>
+          <p>Integrating LND-11 reduces spatial screening costs and avoids expensive operational surprises during construction:</p>
+          <ul class="bullet-list" style="margin-top: 1rem;">
+            <li><strong>Reduce Diligence Speed:</strong> Accelerate property screening timelines from 4 weeks to under 2 minutes.</li>
+            <li><strong>Portfolio-Wide Auditing:</strong> Screen hundreds of locations in parallel, allowing developers to filter plots before bidding.</li>
+            <li><strong>Reduce Capital Write-downs:</strong> Mitigate flood, erosion, and regulatory soil setbacks prior to land registry.</li>
+          </ul>
+        </div>
+        <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-around; height: 100%;">
+          <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+            <h4 style="font-size: 2.2rem; color: var(--success); font-family: 'Outfit'; font-weight: 800;">₹15 Lakhs+</h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Average pre-bid saving per site compared to hiring external consultants.</p>
+          </div>
+          <div style="padding-top: 1rem;">
+            <h4 style="font-size: 2.2rem; color: var(--success); font-family: 'Outfit'; font-weight: 800;">99.5%</h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Diligence cycle time reduction.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: Call to Action (Interactive Demo) -->
+    <div class="slide" id="slide-11">
+      <span class="slide-subtitle">Interactive Demonstration</span>
+      <h2 class="slide-title">Run a Live Score Calculation</h2>
+      <div class="calculator-box">
+        <div>
+          <div class="form-group">
+            <label for="district-select">Select Project District</label>
+            <select id="district-select" class="form-select" onchange="runSimulation()">
+              <option value="Jodhpur">Jodhpur, Rajasthan (Arid / Solar Site)</option>
+              <option value="Kutch">Kutch, Gujarat (Coastal Plain / Wind Site)</option>
+              <option value="Pune">Pune, Maharashtra (Hilly Slope / Township)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="survey-input">Survey / Plot Identifier</label>
+            <select id="survey-input" class="form-select">
+              <option value="45">Survey No. 45-A</option>
+              <option value="122">Survey No. 122/C</option>
+            </select>
+          </div>
+          <button class="calc-btn" onclick="runSimulation()">Generate Mock Rating</button>
+        </div>
+        <div class="calc-result-panel">
+          <div style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;" id="calc-region-label">Jodhpur, Rajasthan</div>
+          <div style="font-size: 3.5rem; font-family: 'Outfit'; font-weight: 800; color: var(--warning); margin-bottom: 0.5rem;" id="calc-grade">A</div>
+          <div style="display: flex; gap: 1.5rem; margin-bottom: 1rem;">
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Climate Risk</div>
+              <div style="font-weight: 600;" id="calc-climate">38/100</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Water Security</div>
+              <div style="font-weight: 600;" id="calc-water">42/100</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Suitability</div>
+              <div style="font-weight: 600;" id="calc-suit">78/100</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--primary); font-weight: 600;" id="calc-flag">FLAG: Over-exploited Groundwater</div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <p style="font-size: 1.1rem; color: var(--text-main);">Ready to secure your land portfolio? Contact us at <strong>partners@lnd11.com</strong> for a pilot.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Controls Footer -->
+  <div id="presentation-footer">
+    <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>
+      ← Previous
+    </button>
+    <div class="slide-progress-container">
+      <div id="slide-progress-bar"></div>
+    </div>
+    <div id="slide-indicator">Slide 1 of 11</div>
+    <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">
+      Next →
+    </button>
+  </div>
+
+  <script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const progressBar = document.getElementById('slide-progress-bar');
+    const slideIndicator = document.getElementById('slide-indicator');
+
+    function updateNavigation() {
+      slides.forEach((slide, index) => {
+        if (index === currentSlideIndex) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update buttons
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === slides.length - 1;
+
+      // Update progress bar
+      const progressPercent = (currentSlideIndex / (slides.length - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Update text indicator
+      slideIndicator.textContent = `Slide ${currentSlideIndex + 1} of ${slides.length}`;
+    }
+
+    function changeSlide(direction) {
+      const nextIndex = currentSlideIndex + direction;
+      if (nextIndex >= 0 && nextIndex < slides.length) {
+        currentSlideIndex = nextIndex;
+        updateNavigation();
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      }
+    });
+
+    // Capability Demo switch tabs
+    function switchDemo(tabIndex) {
+      const tabs = document.querySelectorAll('.demo-tab');
+      const cards = document.querySelectorAll('.demo-card');
+
+      tabs.forEach((tab, index) => {
+        if (index === tabIndex) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      cards.forEach((card, index) => {
+        if (index === tabIndex) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+
+    // Live Calculation Simulation
+    const simulationData = {
+      Jodhpur: {
+        region: "Jodhpur, Rajasthan (Arid / Solar Site)",
+        grade: "A",
+        climate: "38 / 100",
+        water: "42 / 100",
+        suitability: "78 / 100",
+        flag: "ALERT: Over-exploited groundwater. Deep boring restricted.",
+        gradeColor: "var(--warning)"
+      },
+      Kutch: {
+        region: "Kutch, Gujarat (Coastal Plain / Wind Site)",
+        grade: "AA",
+        climate: "22 / 100",
+        water: "64 / 100",
+        suitability: "85 / 100",
+        flag: "ALERT: Moderate cyclone/storm surge vulnerability.",
+        gradeColor: "var(--success)"
+      },
+      Pune: {
+        region: "Pune, Maharashtra (Hilly Slope / Township)",
+        grade: "BBB",
+        climate: "48 / 100",
+        water: "72 / 100",
+        suitability: "52 / 100",
+        flag: "ALERT: Slopes exceed 15°. Soil landslide check recommended.",
+        gradeColor: "var(--warning)"
+      }
+    };
+
+    function runSimulation() {
+      const select = document.getElementById('district-select');
+      const data = simulationData[select.value];
+      
+      const regionLabel = document.getElementById('calc-region-label');
+      const grade = document.getElementById('calc-grade');
+      const climate = document.getElementById('calc-climate');
+      const water = document.getElementById('calc-water');
+      const suit = document.getElementById('calc-suit');
+      const flag = document.getElementById('calc-flag');
+
+      // Trigger animations
+      grade.style.animation = 'none';
+      grade.offsetHeight; /* trigger reflow */
+      grade.style.animation = 'fadeIn 0.3s ease forwards';
+
+      regionLabel.textContent = data.region;
+      grade.textContent = data.grade;
+      grade.style.color = data.gradeColor;
+      climate.textContent = data.climate;
+      water.textContent = data.water;
+      suit.textContent = data.suitability;
+      flag.textContent = data.flag;
+    }
+
+    // Initialize progress bar
+    updateNavigation();
+  </script>
+</body>
+</html>
